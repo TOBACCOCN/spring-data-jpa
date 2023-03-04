@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--https://logback.qos.ch/manual/layouts.html-->
+    <!-- %d 日期，%p 日志级别，%t 线程名，%file 日志输出源文件，%logger 日志输出全类名 -->
+    <!-- %line 日志所在行数，%m 输出的信息，%n 换行 -->
+    <property name="PATTERN" value="%d %p ${PID:- } %t %logger : %m%n%wEx"/>
+    <property name="MY_FILE_LOG_PATTERN"
+              value="%d -%5p ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n%wEx"/>
+    <property name="CHARSET" value="UTF-8"/>
+
+    <!--<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>${CHARSET}</charset>
+        </encoder>
+    </appender>-->
+
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <include resource="logback-debug.xml"/>
+    <include resource="logback-warn.xml"/>
+
+    <!-- 全局输出日志级别 -->
+    <!-- 级别依次为【从高到低】：OFF  > ERROR > WARN > INFO > DEBUG > TRACE > ALL  -->
+    <!--ch.qos.logback.classic.Level-->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG_APPENDER"/>
+        <appender-ref ref="WARN_APPENDER"/>
+    </root>
+
+    <!-- 指定项目中某个包，当有日志操作行为时的日志记录级别 -->
+    <!-- addtivity：是否将日志输出到 root 指定的 appender-ref，默认是 true，为 false 时，需要单独指定自己的 appender-ref  -->
+    <!-- 如下配置，也就是指定包下的日志会输出到 CONSOLE 和 FILE  -->
+    <logger name="com.example.springdatajpa" level="DEBUG" additivity="true"/>
+
+    <logger name="jdbc.connection" level="OFF"/>
+    <logger name="jdbc.audit" level="OFF"/>
+    <logger name="jdbc.resultset" level="OFF"/>
+    <logger name="jdbc.sqlonly" level="OFF"/>
+    <logger name="jdbc.sqltiming" level="INFO"/>
+    <logger name="jdbc.resultsettable" level="INFO"/>
+
+</configuration>
