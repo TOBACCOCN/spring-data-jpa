@@ -27,15 +27,19 @@ public interface CreateUpdateRepository extends JpaRepository<CreateUpdate, Long
     List<CreateUpdate> byCreater(@Param("creater") String creater, @Param("sort") String sort);
 
     @Modifying
-    @Query("update CreateUpdate cu set cu.creater = ?1 where cu.id = ?2")
-    int updateCreaterById(String creater, Long id);
+    // @Query("update CreateUpdate cu set cu.creater = ?1 where cu.id = ?2")
+    @Query("update CreateUpdate cu set cu.creater = :creater where cu.id = :id")
+    int updateCreaterById(@Param("creater") String creater, @Param("id") Long id);
 
     @Query(value = "select cu from CreateUpdate cu where cu.creater = ?1")
+    // @Query(value = "select * from create_update cu where cu.creater = ?1", nativeQuery = true)   // not work
     List<CreateUpdate> byCreaterThenSort(String creater, Sort sort);
 
-    // @Query(value = "select cu from CreateUpdate cu where cu.creater = ?1")
-    @Query(value = "select * from create_update cu where cu.creater = ?1", nativeQuery = true)
+    @Query(value = "select cu from CreateUpdate cu where cu.creater = ?1")
+    // @Query(value = "select * from create_update cu where cu.creater = ?1", nativeQuery = true)
     List<CreateUpdate> byCreaterPageable(String creater, Pageable pageable);
+
+    // byCreaterThenSort 与 byCreaterPageable 方法说明，参数中的 Sort 在 HQL 中才有效，Pageable 在 HQL 和 nativeQuery 中都有效
 
     // @Procedure("plus1inout")
     @Procedure(procedureName = "plus1inout")

@@ -13,7 +13,6 @@ import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Predicate;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -49,29 +48,19 @@ class CreateUpdateRepositoryTest {
 
         // ExampleMatcher 用法
         CreateUpdate createUpdate = new CreateUpdate();
-        createUpdate.setCreater("2");
+        createUpdate.setCreater("1");
         ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("creater", ExampleMatcher.GenericPropertyMatchers.endsWith());
         List<CreateUpdate> list = createUpdateRepository.findAll(Example.of(createUpdate, matcher));
         log.info(">>>>> LIST: [{}]", list);
 
-        // Specification
-        // List<CreateUpdate> createUpdateList = createUpdateRepository.findAll((Specification<CreateUpdate>) (root, query, criteriaBuilder) ->
-        //         criteriaBuilder.and(criteriaBuilder.equal(root.get("id"), "103")));
-
+        // Specification(CriteriaQuery, CriteriaBuilder, Predicate)
         List<CreateUpdate> createUpdateList = createUpdateRepository.findAll((Specification<CreateUpdate>) (root, query, criteriaBuilder) -> {
-            Predicate predicate = criteriaBuilder.notEqual(root.get("creater"), "creater_11");
-            Predicate predicate1 = criteriaBuilder.lessThan(root.get("updateTime"), new Date());
-            Predicate predicate2 = criteriaBuilder.greaterThan(root.get("id"), 104);
-            return criteriaBuilder.and(criteriaBuilder.or(predicate, predicate1), predicate2);
+            Predicate predicate = criteriaBuilder.equal(root.get("creater"), "creater_1");
+            Predicate predicate1 = criteriaBuilder.isNull(root.get("updateTime"));
+            Predicate predicate2 = criteriaBuilder.greaterThan(root.get("id"), 0);
+            return criteriaBuilder.and(criteriaBuilder.and(criteriaBuilder.or(predicate, predicate1), predicate2));
         });
         log.info(">>>>> CREATE_UPDATE_LIST: [{}]", createUpdateList);
-
-        // CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        // CriteriaQuery<CreateUpdate> query = builder.createQuery(CreateUpdate.class);
-        // builder.equal("", "");
-        // CriteriaQuery<CreateUpdate> where = query.where(builder.and());
-        // // entityManager.createQuery(query);
-        // createUpdateRepository.findo
     }
 
     @Test
@@ -88,13 +77,13 @@ class CreateUpdateRepositoryTest {
 
     @Test
     public void byCreaterThenSort() {
-        List<CreateUpdate> list = createUpdateRepository.byCreaterThenSort("creater_2", Sort.by(Sort.Direction.DESC, "id"));
+        List<CreateUpdate> list = createUpdateRepository.byCreaterThenSort("creater_1", Sort.by(Sort.Direction.DESC, "id"));
         log.info(">>>>> LIST: [{}]", list);
     }
 
     @Test
     public void byCreaterPageable() {
-        List<CreateUpdate> list = createUpdateRepository.byCreaterPageable("creater_1", Pageable.ofSize(2).withPage(0));
+        List<CreateUpdate> list = createUpdateRepository.byCreaterPageable("creater_1", Pageable.ofSize(2).withPage(2));
         log.info(">>>>> LIST: [{}]", list);
     }
 
@@ -125,7 +114,7 @@ class CreateUpdateRepositoryTest {
     }
 
     @Test
-    public void byCreateTime() throws IOException, ClassNotFoundException {
+    public void byCreateTime() {
         String date = "2023-01-15 21:22:51";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         ZonedDateTime zonedDateTime = LocalDateTime.parse(date, formatter).atZone(ZoneId.systemDefault());
@@ -138,8 +127,8 @@ class CreateUpdateRepositoryTest {
         CreateUpdate createUpdate = new CreateUpdate();
         createUpdate.setCreater("creater_1");
         createUpdate.setUpdater("updater_1");
-        // createUpdate.setId(102L);
-        createUpdateRepository.save(createUpdate);  // save：没有主键时插入，有主键时会根据主键查询数据库是否存在对应数据，不存在时根据规则设置新主键值插入数据，存在时更新数据
+        createUpdate.setId(102L);
+        createUpdateRepository.save(createUpdate);  // save：没有主键时根据规则设置新主键值插入数据，有主键时会根据主键查询数据库是否存在对应数据，不存在时插入数据，存在时更新数据
     }
 
     @Test
